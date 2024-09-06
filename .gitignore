@@ -1,0 +1,9 @@
+__pycache__/
+.access_token
+.refresh_token
+config.yml
+test.py
+mdr_integration/data/*
+mdr_integration/data/files/*
+!**/data/files/
+*.log

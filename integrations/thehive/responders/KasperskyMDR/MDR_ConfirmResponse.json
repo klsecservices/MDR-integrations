@@ -1,0 +1,51 @@
+{
+  "name": "MDR_ConfirmResponse",
+  "version": "1.0",
+  "author": "Kaspersky",
+  "url": "https://",
+  "license": "None",
+  "description": "Confirm the response to the incident in Kaspersky MDR",
+  "dataTypeList": ["thehive:case_task_log"],
+  "command": "KasperskyMDR/mdr.py",
+  "baseConfig": "KasperskyMDR",
+  "config": {
+    "service": "confirm_response"
+  },
+  "configurationItems": [
+    {
+      "name": "api_url",
+      "description": "MDR URL, by default https://mdr.kaspersky.com/api/v1",
+      "type": "string",
+      "multi": false,
+      "required": false
+    },
+    {
+      "name": "client_id",
+      "description": "Client ID to access to MDR API",
+      "type": "string",
+      "multi": false,
+      "required": false
+    },
+    {
+      "name": "token_dir",
+      "description": "Path to the directory with access_token",
+      "type": "string",
+      "multi": false,
+      "required": false
+    },
+    {
+      "name": "ssl_cert",
+      "description": "Path to .pem server sertificate",
+      "type": "string",
+      "multi": false,
+      "required": false
+    },
+    {
+      "name": "config_path",
+      "description": ".. or specify config file to access to MDR API",
+      "type": "string",
+      "multi": false,
+      "required": false
+    }
+  ]
+}

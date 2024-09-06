@@ -1,0 +1,33 @@
+# General settings
+api_url: https://mdr.kaspersky.com/api/v1
+client_id: 1f1f1f1f1f1fc144a4b9a3af6a6a6a6a6a
+#ssl_cert: conf/mdr.pem  # relative path from main.py
+token_dir: conf  # relative path from main.py
+data_dir: data  # relative path from main.py
+
+# Modules settings
+token_updater:
+    period: 590  # default 600
+
+mdr_sync:
+    period: 60  # default 60
+    max_incidents_at_time: 10  # how many incidents can be synced at a time. This parameter prevents a flood scenario.
+    download_attachments_size_limit: 1000000  # max file size in bytes
+    filter:
+        incidents:
+            statuses:
+                - Open  # Closed, On hold, Open, Resolved
+            priorities:
+                - LOW  # LOW, NORMAL, HIGH
+            min_creation_time: 1655096127000  # miliseconds
+    exclude_author: John Connor  # usually it's you own username. It's needed to prevent pulling your own comments
+
+thehive:
+    api_url: http://127.0.0.1:9000 
+    api_key: jB79oI4ywUY1jBae5CdDmp4oyeuq0Dha
+    ssl_cert: /opt/mdr/conf/thehive.pem  # full path
+    period: 60  # default 60
+
+logging:
+    log_dir: log
+    log_level: DEBUG  # DEBUG, INFO, WARNING, ERROR, CRITICAL
