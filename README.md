@@ -1,6 +1,14 @@
+<p align="center">
+   <img src="https://img.shields.io/badge/Version-v1.0-blue" alt="Version">
+   <img src="https://img.shields.io/badge/License-MIT-brightgreen" alt="License">
+   <a href="https://github.com/klsecservices/MDR-integrations/issues"><img src="https://img.shields.io/github/issues/klsecservices/MDR-integrations.svg?maxAge=60&style=flat-square" alt="Issues"></a>
+</p>
+
 # Kaspersky MDR Integration
 
 Kaspersky MDR integration is a tool designed to provide the capability to integrate third-party systems with the Kaspersky Managed Detection and Response (MDR) Console. It helps to automatically route MDR incidents to the appropriate IRP/SOAR or ticket system for more convinient way of communication with Security Operation Team.
+
+If you have a problem, request, or question then please open a new issue [here](https://github.com/klsecservices/MDR-integrations/issues).
 
 ## Content
 
@@ -44,7 +52,7 @@ touch .refresh_token
 cp sample_config.yml config.yml
 ```
 
-Create your refresh token using [this guide (kaspersky.com)](https://support.kaspersky.com/MDR/en-US/204468.htm). Paste generated token to the .refresh_token file.
+Create your refresh token using [this guide (kaspersky.com)](https://support.kaspersky.com/MDR/en-US/258278.htm). Paste generated token to the .refresh_token file.
 
 Configure ```conf/config.yml``` file. The most important settings:
 
@@ -121,6 +129,12 @@ sudo systemctl status mdr_integration.service
 ```
 
 ## References
-* [Kaspersky MDR (kaspersky.com)](https://support.kaspersky.com/MDR/en-US/255956.htm)
+* [Request a Free Kaspersky MDR POC](https://www.kaspersky.com/enterprise-security/managed-detection-and-response)
+* [Kaspersky MDR Datasheet](https://content.kaspersky-labs.com/se/media/en/business-security/kaspersky-mdr-datasheet.pdf)
+* [Kaspersky MDR Help](https://support.kaspersky.com/MDR/en-US/255956.htm)
 * [Kaspersky MDR Open REST API Reference](https://support.kaspersky.com/MDR/RestAPI/REST_API_doc.html)
 * [KUMA Community: Интеграция с Kaspersky MDR](https://kb.kuma-community.ru/books/integracii/page/integraciia-s-kaspersky-mdr)
+
+## License
+
+Project is distributed under the [MIT license](/LICENSE).
