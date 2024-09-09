@@ -15,7 +15,7 @@ class MDRSync():
     def __init__(self, config: Dict[str, Any]) -> None:
         api_url = config.get('api_url')
         client_id = config.get('client_id')
-        ssl_cert = config.get('ssl_cert')
+        ssl_cert = config.get('ssl_cert', False)
         self.period = config['mdr_sync'].get('period', 60)
         self.data_dir = config.get('data_dir', 'data')
         self.token_dir = config.get('token_dir', 'conf')

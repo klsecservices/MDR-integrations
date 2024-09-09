@@ -6,4 +6,5 @@ test.py
 mdr_integration/data/*
 mdr_integration/data/files/*
 !**/data/files/
-*.log
+app.log
+app.log.*

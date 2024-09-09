@@ -12,22 +12,17 @@ import multiprocessing
 #from src.mdr_api import MDRConsole
 from src.token_updater import TokenUpdater
 from src.mdr_sync import MDRSync
+from src.integration_kuma import KUMA
 #from src.integration_thehive import TheHive
 from src.logger import MDRLogger
 
 WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 with open(f'{WORK_DIR}/conf/config.yml', 'r') as f:
     config = yaml.safe_load(f)
-API_URL = config.get('api_url')
-CLIENT_ID = config.get('client_id')
-SSL_CERT = config.get('ssl_cert', True)
-PERIOD = config['token_updater'].get('period')
 
 config['token_dir'] = f"{WORK_DIR}/{config.get('token_dir', 'conf')}"
 config['data_dir'] = f"{WORK_DIR}/{config.get('data_dir', 'conf')}"
 config['logging']['log_dir'] = f"{WORK_DIR}/{config['logging'].get('log_dir', 'log')}"
-if config.get('ssl_cert') not in [True, False]:
-    config['ssl_cert'] = f"{WORK_DIR}/{config.get('ssl_cert', 'conf/mdr.pem')}"
 
 temp_files = ['.access_token', '.refresh_token', '.last_check']
 for temp_file in temp_files:
@@ -39,7 +34,6 @@ def process_logging_configurer(queue):
     h = logging.handlers.QueueHandler(queue)  # Just the one handler needed
     root = logging.getLogger()
     root.addHandler(h)
-    # send all messages, for demo; no other level or filter logic applied.
     root.setLevel(logging.DEBUG)
 
 def main():
@@ -56,20 +50,22 @@ def main():
 
     # Run automatic token updater
     token_updater = TokenUpdater(config)
-    #token_updater.run()
     process_token_updater = multiprocessing.Process(target = token_updater.run, args=(logging_queue, process_logging_configurer))
 
     mdr_sync = MDRSync(config)
-    #mdr_sync.run()
     process_mdr_sync = multiprocessing.Process(target = mdr_sync.run, args=(logging_queue, process_logging_configurer))
 
+    kuma_intergation = KUMA(config)
+    process_kuma_intergation = multiprocessing.Process(target = kuma_intergation.run, args=(logging_queue, process_logging_configurer))
+
     #the_hive = TheHive(config)
-    #the_hive.run()
     #process_the_hive = multiprocessing.Process(target = the_hive.run)
 
     process_token_updater.start()
     time.sleep(5)
     process_mdr_sync.start()
+    time.sleep(5)
+    process_kuma_intergation.start()
     time.sleep(5)
     #process_the_hive.start()
 
