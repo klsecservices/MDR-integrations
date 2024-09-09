@@ -22,6 +22,13 @@ mdr_sync:
             min_creation_time: 1655096127000  # miliseconds
     exclude_author: John Connor  # usually it's you own username. It's needed to prevent pulling your own comments
 
+kuma:
+    api_url: https://192.168.1.1:7223
+    api_token: aa11bb22cc33dd44ee55ff66  # Settings -> Users -> <user> -> Generate token. Assign role and add API access rights to manage incidents.
+    tenant_id: 12345678-abcd-ef12-ab23-1a2b3c4d5e6f  # Tenant ID
+    #ssl_cert: false
+    period: 60  # default 60
+
 thehive:
     api_url: http://127.0.0.1:9000 
     api_key: jB79oI4ywUY1jBae5CdDmp4oyeuq0Dha
