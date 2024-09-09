@@ -1,14 +1,14 @@
 <p align="center">
    <img src="https://img.shields.io/badge/Version-v1.0-blue" alt="Version">
-   <img src="https://img.shields.io/badge/License-MIT-brightgreen" alt="License">
-   <a href="https://github.com/klsecservices/MDR-integrations/issues"><img src="https://img.shields.io/github/issues/klsecservices/MDR-integrations.svg?maxAge=60&style=flat-square" alt="Issues"></a>
+   <a href="/LICENSE"><img src="https://img.shields.io/badge/License-Unlicense-brightgreen" alt="License"></a>
+   <a href="/issues"><img src="https://img.shields.io/github/issues/klsecservices/MDR-integrations.svg?maxAge=60&style=flat-square" alt="Issues"></a>
 </p>
 
 # Kaspersky MDR Integration
 
 Kaspersky MDR integration is a tool designed to provide the capability to integrate third-party systems with the Kaspersky Managed Detection and Response (MDR) Console. It helps to automatically route MDR incidents to the appropriate IRP/SOAR or ticket system for more convinient way of communication with Security Operation Team.
 
-If you have a problem, request, or question then please open a new issue [here](https://github.com/klsecservices/MDR-integrations/issues).
+If you have a problem, request, or question then please open a new issue [here](/issues).
 
 ## Content
 
@@ -137,4 +137,4 @@ sudo systemctl status mdr_integration.service
 
 ## License
 
-Project is distributed under the [MIT license](/LICENSE).
+Project is distributed under the [Unlicense license](/LICENSE).
