@@ -6,9 +6,6 @@ import logging
 from typing import Optional, Dict, Any, List, Union
 
 from src.mdr_api import MDRConsole
-#from src.logger import MDRLogger
-
-logger = logging.getLogger(__name__)
 
 class MDRSync():
 
@@ -56,15 +53,15 @@ class MDRSync():
         try:
             incidents_count = self.mdr.get_incidents_count(**kwargs)['count']
         except Exception as e:
-            logger.exception('Error while getting incidents count')
+            self.logger.exception('Error while getting incidents count')
             return
         if incidents_count > self.max_incidents_at_time:
-            logger.error(f'Too many incidents are going to be received: {incidents_count} > {self.max_incidents_at_time}')
+            self.logger.error(f'Too many incidents are going to be received: {incidents_count} > {self.max_incidents_at_time}')
             return f'Too many incidents are going to be received: {incidents_count} > {self.max_incidents_at_time}'
         try:
             incident_list = self.mdr.get_incidents_list(**kwargs)
         except Exception as e:
-            logger.exception('Error while getting incident list')
+            self.logger.exception('Error while getting incident list')
             return
         for incident in incident_list:
             # identify updates and push them to data directory
@@ -88,11 +85,11 @@ class MDRSync():
         try:
             content = self.mdr.attachments_download(attachment_id = attachment_id)
         except Exception as e:
-            logger.exception('Error while downloading attachment')
+            self.logger.exception('Error while downloading attachment')
             return
         with open(f'{self.data_dir}/files/{attachment_id}_{filename}', 'wb') as f:
             f.write(content)
-            logger.info(f'file {filename} has been written to {self.data_dir}/files/{attachment_id}_{filename}')
+            self.logger.info(f'file {filename} has been written to {self.data_dir}/files/{attachment_id}_{filename}')
 
     def parse_incident_updates(self, incident_data: Dict[str, Any], last_check: int) -> Dict[str, Any]:
         incident_id = incident_data['incident_id']
@@ -106,16 +103,16 @@ class MDRSync():
         incident_data.pop('responses')
         # Check if it's the new incident
         if creation_time == update_time or creation_time > last_check:
-            logger.info(f'new incident found. incident_id = {incident_id}, creation_time = {creation_time}')
+            self.logger.info(f'new incident found. incident_id = {incident_id}, creation_time = {creation_time}')
             self.push_updates('new_incident', creation_time, incident_data)
         # Check if there is any updates of incident
         if update_time > last_check:
-            logger.info(f'incident update found. incident_id = {incident_id}, update_time = {update_time}')
+            self.logger.info(f'incident update found. incident_id = {incident_id}, update_time = {update_time}')
             self.push_updates('update_incident', update_time, incident_data)
         # Check updates in attachments
         for attachment in attachments: 
             if attachment['creation_time'] > last_check:  # attachment['was_read'] == False
-                logger.info(f'new attachment found. incident_id = {incident_id}, filename = {attachment["full_name"]}, creation_time = {attachment["creation_time"]}')
+                self.logger.info(f'new attachment found. incident_id = {incident_id}, filename = {attachment["full_name"]}, creation_time = {attachment["creation_time"]}')
                 attachment_creation_time = attachment['creation_time']
                 attachment_data = {
                     'incident_id': incident_id, 
@@ -128,7 +125,7 @@ class MDRSync():
         # Check updates in comments
         for comment in comments: 
             if comment['creation_time'] > last_check:  # comment['was_read'] == False
-                logger.info(f'new comment found. incident_id = {incident_id}, from = {comment["author_name"]}, creation_time = {comment["creation_time"]}')
+                self.logger.info(f'new comment found. incident_id = {incident_id}, from = {comment["author_name"]}, creation_time = {comment["creation_time"]}')
                 comment_creation_time = comment['creation_time']
                 comment_data = {
                     'incident_id': incident_id, 
@@ -140,7 +137,7 @@ class MDRSync():
         # Check updates in responses
         for response in responses:
             if response['creation_time'] > last_check:  # response['was_read'] == False 
-                logger.info(f'new response found. incident_id = {incident_id}, creation_time = {response["creation_time"]}')
+                self.logger.info(f'new response found. incident_id = {incident_id}, creation_time = {response["creation_time"]}')
                 response_creation_time = response['creation_time']
                 response_data = {
                     'incident_id': incident_id, 
@@ -154,16 +151,16 @@ class MDRSync():
         filename = f'{timestamp}_{update_type}.json'
         with open(f'{self.data_dir}/{filename}', 'w') as f:
             json.dump(data, f)
-            logger.info(f'An update has been writen to {filename}')
+            self.logger.info(f'An update has been writen to {filename}')
     
 
     def run(self, logging_queue, logging_configurer):
         logging_configurer(logging_queue)
         self.logger = logging.getLogger(__name__)
-        logger.info('started')
+        self.logger.info('started')
         while True:
-            logger.info('getting updates from MDR..')
+            self.logger.info('getting updates from MDR..')
             self.mdr.access_token = self.update_access_token()
             self.get_incidents()
-            logger.info('getting updates finished')
+            self.logger.info('getting updates finished')
             time.sleep(self.period)

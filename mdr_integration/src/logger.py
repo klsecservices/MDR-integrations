@@ -38,9 +38,9 @@ class MDRLogger():
         while True:
             try:
                 record = queue.get()
-                if record is None:  # We send this as a sentinel to tell the listener to quit.
+                if record is None:
                     break
-                self.logger.handle(record)  # No level or filter logic applied - just do it!
+                self.logger.handle(record)
             except Exception:
                 import sys, traceback
                 print('Whoops! Problem:', file=sys.stderr)
