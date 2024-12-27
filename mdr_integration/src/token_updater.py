@@ -13,7 +13,7 @@ class TokenUpdater():
         api_url = config.get('api_url')
         client_id = config.get('client_id')
         ssl_cert = config.get('ssl_cert')
-        self.period = config['token_updater'].get('period', 600)
+        self.timeout = config['token_updater'].get('timeout', 600)
         self.token_dir = config.get('token_dir', 'conf')
         self.mdr = MDRConsole(api_url = api_url, client_id = client_id, ssl_cert = ssl_cert)
 
@@ -55,7 +55,7 @@ class TokenUpdater():
                 self.write_refresh_token(refresh_token)
 
             self.logger.info('tokens updating finished')
-            time.sleep(self.period)
+            time.sleep(self.timeout)
 
     def read_refresh_token(self):
         with open(f'{self.token_dir}/.refresh_token', 'r') as f:

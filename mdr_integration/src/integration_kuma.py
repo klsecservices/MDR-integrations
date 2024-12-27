@@ -22,9 +22,13 @@ class KUMA():
         api_token = config['kuma'].get('api_token')
         ssl_cert = config['kuma'].get('ssl_cert', False)
         self.tenant_id = config['kuma'].get('tenant_id')
-        self.period = config['kuma'].get('period', 60)
+        self.incident_timeout = config['kuma']['modules']['incident'].get('timeout', 60)
+        self.asset_timeout = config['kuma']['modules']['asset'].get('timeout', 10800)
+        self.timeout = 10  # default value for infinite loop
         self.data_dir = config.get('data_dir', 'data')
         self.api = KUMA_API(api_url, api_token, ssl_cert)
+        self.enable_incident = config['kuma']['modules']['incident'].get('enable', False)
+        self.enable_asset = config['kuma']['modules']['asset'].get('enable', False)
 
 
     def scan_folder(self):
@@ -50,6 +54,10 @@ class KUMA():
             if '-new_comment' in update_file:
                 if self.add_comment(data):
                     self.set_update_as_processed(update_file)
+
+
+    def import_assets(self):
+        pass
 
 
     def create_incident(self, data):
@@ -84,11 +92,27 @@ class KUMA():
 
 
     def run(self, logging_queue, logging_configurer):
+        if not self.enable_incident and not self.enable_asset:
+            return
         logging_configurer(logging_queue)
         self.logger = logging.getLogger(__name__)
         self.logger.info('started')
+        incident_timeout_cur = 0
+        asset_timeout_cur = 0
         while True:
-            self.logger.info('starting to process new updates..')
-            self.process_updates()
-            self.logger.info('MDR updates are processed')
-            time.sleep(self.period)
+
+            if self.enable_incident and incident_timeout_cur <= 0:
+                self.logger.info('starting to process new updates..')
+                self.process_updates()
+                self.logger.info('MDR updates are processed')
+                incident_timeout_cur = self.incident_timeout
+            
+            if self.enable_asset and asset_timeout_cur <= 0:
+                self.logger.info('starting to import assets..')
+                self.import_assets()
+                self.logger.info('MDR assets are processed')
+                asset_timeout_cur = self.enable_asset
+            
+            incident_timeout_cur = incident_timeout_cur - self.timeout
+            asset_timeout_cur = asset_timeout_cur - self.timeout
+            time.sleep(self.timeout)
