@@ -25,10 +25,10 @@ class MDRSync():
         self.access_token = self.update_access_token()
         self.incident_filter = config['mdr_sync']['modules']['incident'].get('filter')
         self.asset_filter = config['mdr_sync']['modules']['asset'].get('filter')
-        self.download_attachments_size_limit = config['mdr_sync'].get('download_attachments_size_limit')
-        self.exclude_author = config['mdr_sync'].get('exclude_author')
+        self.download_attachments_size_limit = config['mdr_sync']['modules']['incident'].get('download_attachments_size_limit')
+        self.exclude_author = config['mdr_sync']['modules']['incident'].get('exclude_author')
         self.mdr = MDRConsole(api_url = api_url, client_id = client_id, access_token = self.access_token, ssl_cert = ssl_cert)
-        self.max_incidents_at_time = config['mdr_sync'].get('max_incidents_at_time')
+        self.max_incidents_at_time = config['mdr_sync']['modules']['incident'].get('max_incidents_at_time')
         self.enable_incident = config['mdr_sync']['modules']['incident'].get('enable', False)
         self.enable_asset = config['mdr_sync']['modules']['asset'].get('enable', False)
         self.asset_output_format = config['mdr_sync']['modules']['asset'].get('output_format', 'json')
@@ -240,13 +240,14 @@ class MDRSync():
                 **network_interfaces
             })
 
-        asset_import_time = int(time.time()*1000)
+        #asset_import_time = int(time.time()*1000)
+        asset_import_time = 0
         self.push_updates(update_type = 'asset_export', timestamp = asset_import_time, data = assets, file_extension = self.asset_output_format)
 
 
-    def push_updates(self, update_type: str, timestamp: int, data: Dict[str, Any], file_extension: str) -> None:
-        if not file_extension:
-            file_extension = 'json'
+    def push_updates(self, update_type: str, timestamp: int, data: Dict[str, Any], file_extension: str = 'json') -> None:
+        #if not file_extension:
+        #    file_extension = 'json'
         timestamp = str(timestamp)
         filename = f'{timestamp}_{update_type}.json'
         with open(f'{self.data_dir}/{filename}', 'w') as f:

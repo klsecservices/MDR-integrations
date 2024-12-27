@@ -7,33 +7,55 @@ data_dir: data  # relative path from main.py
 
 # Modules settings
 token_updater:
-    period: 590  # default 600
+    timeout: 590  # default 600
 
 mdr_sync:
-    period: 60  # default 60
-    max_incidents_at_time: 10  # how many incidents can be synced at a time. This parameter prevents a flood scenario.
-    download_attachments_size_limit: 1000000  # max file size in bytes
-    filter:
-        incidents:
-            statuses:
-                - Open  # Closed, On hold, Open, Resolved
-            priorities:
-                - LOW  # LOW, NORMAL, HIGH
-            min_creation_time: 1655096127000  # miliseconds
-    exclude_author: John Connor  # usually it's you own username. It's needed to prevent pulling your own comments
+    modules:
+        incident:
+            enable: false
+            timeout: 60  # default 60
+            max_incidents_at_time: 10  # how many incidents can be synced at a time. This parameter prevents a flood scenario.
+            download_attachments_size_limit: 1000000  # max file size in bytes
+            exclude_author: John Connor  # usually it's you own username. It's needed to prevent pulling your own comments
+            filter:  # please visit API documentation to fill this settings correctly. https://support.kaspersky.com/MDR/RestAPI/REST_API_doc.html#tag/Incidents/paths/~1v1~1{client_id}~1incidents~1list/post
+                statuses:
+                    - Open  # Closed, On hold, Open, Resolved
+                priorities:
+                    - LOW  # LOW, NORMAL, HIGH
+                min_creation_time: 1655096127000  # miliseconds
+        asset:
+            enable: true
+            timeout: 60  # default 10800
+            output_format: json  # default json
+            filter:  # please visit API documentation to fill this settings correctly. https://support.kaspersky.com/MDR/RestAPI/REST_API_doc.html#tag/Assets/paths/~1v1~1{client_id}~1assets~1list/post
+                statuses:
+                    - ABSENT 
+                    - CRITICAL
+                    - OFFLINE
+                    - OK
+                    - WARNING
 
 kuma:
     api_url: https://192.168.1.1:7223
     api_token: aa11bb22cc33dd44ee55ff66  # Settings -> Users -> <user> -> Generate token. Assign role and add API access rights to manage incidents.
     tenant_id: 12345678-abcd-ef12-ab23-1a2b3c4d5e6f  # Tenant ID
     #ssl_cert: false
-    period: 60  # default 60
+    modules:
+        incident:
+            enable: true
+            timeout: 60  # default 60
+        asset:
+            enable: true
+            timeout: 60  # default 10800
 
 thehive:
     api_url: http://127.0.0.1:9000 
     api_key: jB79oI4ywUY1jBae5CdDmp4oyeuq0Dha
     ssl_cert: /opt/mdr/conf/thehive.pem  # full path
-    period: 60  # default 60
+    modules:
+        incident:
+            enable: false
+            timeout: 60  # default 60
 
 logging:
     log_dir: log
