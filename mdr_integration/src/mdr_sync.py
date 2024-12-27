@@ -198,6 +198,7 @@ class MDRSync():
         assets = []
         for asset in assets_list:
             if self.asset_output_format == 'csv':
+
                 def merge_network_interface_data(asset_network_interfaces, param_name):
                     if param_name in ['ipv4', 'ipv6']:
                         match = {
@@ -206,9 +207,10 @@ class MDRSync():
                         }
                         ips = []
                         for interface in asset_network_interfaces:
-                            ips.extend([ ip for ip in interface['ip'].split('|') if re.match(ip, match(param_name)) ])
+                            ips.extend([ ip for ip in interface['ip'].split('|') if re.match(match[param_name], ip) ])
                         return '|'.join(ips)
-                    return '|'.join([ interface[param_name] for interface in asset_network_interfaces ])
+                    return '|'.join([ interface[param_name] for interface in asset_network_interfaces if interface[param_name] ])
+                
                 network_interfaces = {
                     'network_interfaces_dsc':   merge_network_interface_data(asset['network_interfaces'], 'dsc'),
                     'network_interfaces_dnsd':  merge_network_interface_data(asset['network_interfaces'], 'dnsd'),
@@ -218,6 +220,7 @@ class MDRSync():
                     'network_interfaces_ipv4':  merge_network_interface_data(asset['network_interfaces'], 'ipv4'),
                     'network_interfaces_ipv6':  merge_network_interface_data(asset['network_interfaces'], 'ipv6')
                 }
+
             elif self.asset_output_format == 'json':
                 network_interfaces = {
                     'network_interfaces': asset['network_interfaces']
@@ -240,18 +243,26 @@ class MDRSync():
                 **network_interfaces
             })
 
+        if self.asset_output_format == 'csv':
+            headers = ['asset_id','host_name','domain','first_seen','last_seen','os_version','installed_product_info','ksc_host_id','tenant_name','isolation','status','status_reasons','network_interfaces_dsc','network_interfaces_dnsd','network_interfaces_defg','network_interfaces_mac','network_interfaces_ipcm','network_interfaces_ipv4','network_interfaces_ipv6']
+            assets_tmp = ';'.join(headers)
+            for asset in assets:
+                assets_tmp += '\n'
+                assets_tmp += ';'.join([ f'"{asset[header]}"' for header in headers ])
+            assets = assets_tmp
         #asset_import_time = int(time.time()*1000)
         asset_import_time = 0
         self.push_updates(update_type = 'asset_export', timestamp = asset_import_time, data = assets, file_extension = self.asset_output_format)
 
 
     def push_updates(self, update_type: str, timestamp: int, data: Dict[str, Any], file_extension: str = 'json') -> None:
-        #if not file_extension:
-        #    file_extension = 'json'
         timestamp = str(timestamp)
-        filename = f'{timestamp}_{update_type}.json'
+        filename = f'{timestamp}_{update_type}.{file_extension}'
         with open(f'{self.data_dir}/{filename}', 'w') as f:
-            json.dump(data, f)
+            if file_extension == 'csv':
+                f.write(data)
+            else:
+                json.dump(data, f)
             self.logger.info(f'An update has been writen to {filename}')
     
 
