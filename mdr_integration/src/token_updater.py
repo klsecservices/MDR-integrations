@@ -28,7 +28,7 @@ class TokenUpdater():
             if refresh_token:
                 refresh_token_exp = jwt.decode(refresh_token, options={"verify_signature": False}).get("exp")
                 self.logger.info(f'refresh_token expiration time: {datetime.datetime.fromtimestamp(refresh_token_exp)}')
-                if refresh_token_exp > time.time():
+                if (refresh_token_exp - self.timeout) > time.time():
                     self.logger.info(f'refresh_token is actual')
                 else:
                     self.logger.error(f'You should update {self.token_dir}/.refresh_token. Please take it from MDR Console (https://support.kaspersky.com/MDR/en-US/204468.htm).')
@@ -41,7 +41,7 @@ class TokenUpdater():
             if access_token:
                 access_token_exp = jwt.decode(access_token, options={"verify_signature": False}).get("exp")
                 self.logger.info(f'access_token expiration time: {datetime.datetime.fromtimestamp(access_token_exp)}')
-                if access_token_exp > time.time():
+                if (access_token_exp - self.timeout) > time.time():
                     self.logger.info(f'access_token is actual')
                 else:
                     need_update_access_token = True

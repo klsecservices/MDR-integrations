@@ -101,8 +101,23 @@ class MDRSync():
             f.write(content)
             self.logger.info(f'file {filename} has been written to {self.data_dir}/files/{attachment_id}_{filename}')
 
+    def incident_history(self, incident_id: str, min_record_time: int) -> Dict[str, Any]:
+        kwargs = {
+            'entity_type_page_size': 100,
+            'ignore_self': True,
+            'incident_id': incident_id,
+            'min_record_time': min_record_time
+        }
+        try:
+            history = self.mdr.get_incidents_history(**kwargs)
+        except Exception as e:
+            self.logger.exception('Error while getting incidents history')
+            return
+        return history
+
     def parse_incident_updates(self, incident_data: Dict[str, Any], last_check: int) -> Dict[str, Any]:
         incident_id = incident_data['incident_id']
+        incident_number = incident_data['incident_number']
         creation_time = incident_data['creation_time']
         update_time = incident_data['update_time']
         attachments = incident_data.get('attachments')
@@ -117,8 +132,11 @@ class MDRSync():
             self.push_updates('new_incident', creation_time, incident_data)
         # Check if there is any updates of incident
         if update_time > last_check:
+            history = self.incident_history(incident_id, last_check)
             self.logger.info(f'incident update found. incident_id = {incident_id}, update_time = {update_time}')
             self.push_updates('update_incident', update_time, incident_data)
+            self.logger.info(f'incident update details found. incident_id = {incident_id}, incident_nymber = {str(incident_number)}, update_time = {update_time}')
+            self.push_updates(f'incident_updates_{str(incident_number)}', last_check, history)
         # Check updates in attachments
         for attachment in attachments: 
             if attachment['creation_time'] > last_check:  # attachment['was_read'] == False
@@ -130,8 +148,8 @@ class MDRSync():
                 }
                 if re.match(self.exclude_author, attachment['author_name']):
                     continue
-                self.push_updates('new_attachment', attachment_creation_time, attachment_data)
-                self.download_attachment(attachment)
+                #self.push_updates('new_attachment', attachment_creation_time, attachment_data)
+                #self.download_attachment(attachment)
         # Check updates in comments
         for comment in comments: 
             if comment['creation_time'] > last_check:  # comment['was_read'] == False
@@ -143,7 +161,7 @@ class MDRSync():
                 }
                 if re.match(self.exclude_author, comment['author_name']):
                     continue
-                self.push_updates('new_comment', comment_creation_time, comment_data)
+                #self.push_updates('new_comment', comment_creation_time, comment_data)
         # Check updates in responses
         for response in responses:
             if response['creation_time'] > last_check:  # response['was_read'] == False 
@@ -153,7 +171,7 @@ class MDRSync():
                     'incident_id': incident_id, 
                     'responses': [response]
                 }
-                self.push_updates('new_response', response_creation_time, response_data)
+                #self.push_updates('new_response', response_creation_time, response_data)
 
 
     def get_assets(self):
