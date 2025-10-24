@@ -38,6 +38,7 @@ mdr_sync:
 kuma:
     api_url: https://192.168.1.1:7223
     api_token: aa11bb22cc33dd44ee55ff66  # Settings -> Users -> <user> -> Generate token. Assign role and add API access rights to manage incidents.
+    api_version: v3  # v2.1 (default) or v3. API version depends on KUMA version.
     tenant_id: 12345678-abcd-ef12-ab23-1a2b3c4d5e6f  # Tenant ID
     #ssl_cert: false
     modules:

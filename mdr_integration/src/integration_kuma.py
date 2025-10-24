@@ -20,13 +20,14 @@ class KUMA():
     def __init__(self, config):
         api_url = config['kuma'].get('api_url')
         api_token = config['kuma'].get('api_token')
+        api_version = config['kuma'].get('api_version', 'v2.1')
         ssl_cert = config['kuma'].get('ssl_cert', False)
         self.tenant_id = config['kuma'].get('tenant_id')
         self.incident_timeout = config['kuma']['modules']['incident'].get('timeout', 60)
         self.asset_timeout = config['kuma']['modules']['asset'].get('timeout', 10800)
         self.timeout = 10  # default value for infinite loop
         self.data_dir = config.get('data_dir', 'data')
-        self.api = KUMA_API(api_url, api_token, ssl_cert)
+        self.api = KUMA_API(api_url, api_token, ssl_cert, api_version)
         self.enable_incident = config['kuma']['modules']['incident'].get('enable', False)
         self.enable_asset = config['kuma']['modules']['asset'].get('enable', False)
 

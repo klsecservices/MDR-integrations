@@ -14,8 +14,8 @@ class KUMA_API:
     INCIDENT_CREATE_PATH = "/incidents/create"
     INCIDENT_COMMENT_PATH = "/incidents/comment"
     
-    def __init__(self, url, api_token, ssl_cert):
-        self.url = url + '/api/v2.1'
+    def __init__(self, url, api_token, ssl_cert, api_version = 'v2.1'):
+        self.url = url + '/api/' + api_version
         headers = {
             'Authorization': f'Bearer {api_token}'
         }
