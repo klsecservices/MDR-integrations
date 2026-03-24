@@ -3,16 +3,19 @@ import json
 import urllib.parse
 import urllib3
 import logging
+from typing import Optional, Dict, Any, List
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class KUMA_API:
 
+    INCIDENT_GET_PATH = "/incidents"
     INCIDENT_CREATE_PATH = "/incidents/create"
+    INCIDENT_COMMENT_PATH = "/incidents/comment"
     
-    def __init__(self, url, api_token, ssl_cert):
-        self.url = url + '/api/v2.1'
+    def __init__(self, url, api_token, ssl_cert, api_version = 'v2.1'):
+        self.url = url + '/api/' + api_version
         headers = {
             'Authorization': f'Bearer {api_token}'
         }
@@ -21,7 +24,21 @@ class KUMA_API:
         self.session.headers.update(headers)
         self.session.verify = ssl_cert
     
-    def create_incident(self, incident_data):
+
+    def get_incidents(self, params: Dict[str, Any]):
+        """
+        Example:
+        param = {
+            "name": "ID\d+",
+            "status": ["Assigned", "Open", "Closed"]
+        }
+        """
+        url = self.url + self.INCIDENT_GET_PATH
+        result = self.session.get(url = url, params = params)
+        return result
+
+
+    def create_incident(self, incident_data: Dict[str, Any]):
         """
         Example:
         incident_data = {
@@ -63,4 +80,16 @@ class KUMA_API:
         """
         url = self.url + self.INCIDENT_CREATE_PATH
         result = self.session.post(url = url, json = incident_data)
+        return result
+    
+    def create_incident_comment(self, data: Dict[str, Any] ):
+        """
+        Example:
+        data = {
+            "id": "00000000-0000-0000-0000-000000000000",
+            "comment": "comment"
+        }
+        """
+        url = self.url + self.INCIDENT_COMMENT_PATH
+        result = self.session.post(url = url, json = data)
         return result

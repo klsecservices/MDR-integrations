@@ -13,7 +13,7 @@ import multiprocessing
 from src.token_updater import TokenUpdater
 from src.mdr_sync import MDRSync
 from src.integration_kuma import KUMA
-#from src.integration_thehive import TheHive
+from src.integration_thehive import TheHive
 from src.logger import MDRLogger
 
 WORK_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -58,18 +58,19 @@ def main():
     kuma_intergation = KUMA(config)
     process_kuma_intergation = multiprocessing.Process(target = kuma_intergation.run, args=(logging_queue, process_logging_configurer))
 
-    #the_hive = TheHive(config)
-    #process_the_hive = multiprocessing.Process(target = the_hive.run)
+    the_hive = TheHive(config)
+    process_the_hive = multiprocessing.Process(target = the_hive.run, args=(logging_queue, process_logging_configurer))
 
+    logger.info('MDR Integration service started..')
+    
     process_token_updater.start()
     time.sleep(5)
     process_mdr_sync.start()
     time.sleep(5)
     process_kuma_intergation.start()
     time.sleep(5)
-    #process_the_hive.start()
+    process_the_hive.start()
 
-    logger.info('MDR Integration service started..')
 
 if __name__ == '__main__':
     main()

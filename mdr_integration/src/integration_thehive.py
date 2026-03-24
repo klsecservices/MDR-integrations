@@ -1,9 +1,8 @@
 import glob
 import os
-import yaml
 import json
 import time
-import uuid
+import logging
 from typing import Optional, Dict, Any, List, Union
 
 from thehive4py.api import TheHiveApi
@@ -31,15 +30,17 @@ class TheHive():
     }
 
     def __init__(self, config: Dict[str, Any]) -> None:
-        logging_config = config.get('logging')
-        self.logger = MDRLogger(config = logging_config, name = self.__class__.__name__).getLogger()
+        #logging_config = config.get('logging')
+        #self.logger = MDRLogger(config = logging_config, name = self.__class__.__name__).getLogger()
         api_url = config['thehive'].get('api_url')
         api_key = config['thehive'].get('api_key')
         ssl_cert = config['thehive'].get('ssl_cert')
-        self.period = config['thehive'].get('period', 60)
+        self.incident_timeout = config['thehive']['modules']['incident'].get('timeout', 60)
+        self.timeout = 10  # default value for infinite loop
         self.data_dir = config.get('data_dir', 'data')
         self.api = TheHiveApi(api_url, api_key)
-        self.logger.info('initialized')
+        #self.logger.info('initialized')
+        self.enable_incident = config['thehive']['modules']['incident'].get('enable', False)
 
 
     def scan_folder(self):
@@ -329,10 +330,19 @@ class TheHive():
         os.rename(filename, f'{filename}.processed')
 
 
-    def run(self) -> None:
+    def run(self, logging_queue, logging_configurer) -> None:
+        if not self.enable_incident:
+            return
+        self.logger = logging.getLogger(__name__)
         self.logger.info('started')
+        incident_timeout_cur = 0
         while True:
-            self.logger.info('starting to process new updates..')
-            self.process_updates()
-            self.logger.info('processing updates finished')
-            time.sleep(self.period)
+
+            if self.enable_incident:
+                self.logger.info('starting to process new updates..')
+                self.process_updates()
+                self.logger.info('processing updates finished')
+                incident_timeout_cur = self.incident_timeout
+            
+            incident_timeout_cur = incident_timeout_cur - self.timeout
+            time.sleep(self.timeout)
