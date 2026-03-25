@@ -12,7 +12,7 @@ class KUMA():
     # Const
     priority_mapping = {
         'LOW': 1,
-        'MEDIUM': 2,
+        'NORMAL': 2,
         'HIGH': 3,
         '': 4
     }
