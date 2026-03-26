@@ -57,6 +57,7 @@ class MDRSync():
 
     def get_incidents(self) -> Optional[str]:
         last_check = self.get_last_check()
+        current_last_check = last_check
         kwargs = self.incident_filter
         kwargs['min_update_time'] = last_check + 1
         # get count of incidents by filter
@@ -75,7 +76,7 @@ class MDRSync():
             return
         for incident in incident_list:
             # identify updates and push them to data directory
-            self.parse_incident_updates(incident, last_check)
+            self.parse_incident_updates(incident, current_last_check)
             # update last_check parameter based on the latest appeared incident
             if incident['update_time'] > last_check:
                 last_check = incident['update_time']
