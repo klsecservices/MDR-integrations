@@ -133,7 +133,7 @@ class KUMA():
     def update_incident_comment(self, data, incident_number):
 
         params = {
-            "name": f"^{incident_number}\s\-\s"
+            "name": fr"^{incident_number}\s\-\s"
         }
         response = self.get_kuma_incidents(params)
         if not response:
@@ -164,7 +164,7 @@ class KUMA():
     def update_incident_attachment(self, data, incident_number):
         
         params = {
-            "name": f"^{incident_number}\s\-\s"
+            "name": fr"^{incident_number}\s\-\s"
         }
         response = self.get_kuma_incidents(params)
         if not response:
@@ -195,7 +195,7 @@ class KUMA():
     def update_incident_response(self, data, incident_number):
         
         params = {
-            "name": f"^{incident_number}\s\-\s"
+            "name": fr"^{incident_number}\s\-\s"
         }
         response = self.get_kuma_incidents(params)
         if not response:
