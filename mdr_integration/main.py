@@ -8,13 +8,8 @@ import logging.config
 import logging.handlers
 import multiprocessing
 
-
-#from src.mdr_api import MDRConsole
-from src.token_updater import TokenUpdater
-from src.mdr_sync import MDRSync
-from src.integration_kuma import KUMA
-from src.integration_thehive import TheHive
 from src.logger import MDRLogger
+
 
 WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 with open(f'{WORK_DIR}/conf/config.yml', 'r') as f:
@@ -49,27 +44,42 @@ def main():
     logger.info('MDR Integration service is starting..')
 
     # Run automatic token updater
+    from src.token_updater import TokenUpdater
     token_updater = TokenUpdater(config)
     process_token_updater = multiprocessing.Process(target = token_updater.run, args=(logging_queue, process_logging_configurer))
+    time.sleep(2)
+    process_token_updater.start()
 
-    mdr_sync = MDRSync(config)
-    process_mdr_sync = multiprocessing.Process(target = mdr_sync.run, args=(logging_queue, process_logging_configurer))
+    
+    if config['mdr_sync']['modules']['incident']['enable'] or config['mdr_sync']['modules']['asset']['enable']:
+        from src.mdr_sync import MDRSync
+        mdr_sync = MDRSync(config)
+        process_mdr_sync = multiprocessing.Process(target = mdr_sync.run, args=(logging_queue, process_logging_configurer))
+        time.sleep(2)
+        process_mdr_sync.start()
 
-    kuma_intergation = KUMA(config)
-    process_kuma_intergation = multiprocessing.Process(target = kuma_intergation.run, args=(logging_queue, process_logging_configurer))
+    if config['kuma']['modules']['incident']['enable'] or config['kuma']['modules']['asset']['enable']:
+        from src.integration_kuma import KUMA
+        kuma_intergation = KUMA(config)
+        process_kuma_intergation = multiprocessing.Process(target = kuma_intergation.run, args=(logging_queue, process_logging_configurer))
+        time.sleep(2)
+        process_kuma_intergation.start()
+    
+    if config['thehive']['modules']['incident']['enable']:
+        from src.integration_thehive import TheHive
+        the_hive = TheHive(config)
+        process_the_hive = multiprocessing.Process(target = the_hive.run, args=(logging_queue, process_logging_configurer))
+        time.sleep(2)
+        process_the_hive.start()
 
-    the_hive = TheHive(config)
-    process_the_hive = multiprocessing.Process(target = the_hive.run, args=(logging_queue, process_logging_configurer))
+    if config['event_sender']['modules']['incident']['enable'] or config['event_sender']['modules']['asset']['enable']:
+        from src.integration_event_sender import EventSender
+        event_sender = EventSender(config)
+        process_event_sender = multiprocessing.Process(target = event_sender.run, args=(logging_queue, process_logging_configurer))
+        time.sleep(2)
+        process_event_sender.start()
 
     logger.info('MDR Integration service started..')
-    
-    process_token_updater.start()
-    time.sleep(5)
-    process_mdr_sync.start()
-    time.sleep(5)
-    process_kuma_intergation.start()
-    time.sleep(5)
-    process_the_hive.start()
 
 
 if __name__ == '__main__':
