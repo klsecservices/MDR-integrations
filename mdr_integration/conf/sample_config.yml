@@ -58,6 +58,20 @@ thehive:
             enable: false
             timeout: 60  # default 60
 
+event_sender:
+    destination_host: 192.168.0.1  # IP address or resolvable hostname
+    destination_port: 515
+    protocol: tcp  # tcp/udp
+    format: LEEF  # LEEF, CEF, raw
+    syslog_header: true  # true, false
+    modules:
+        incident:
+            enable: true
+            timeout: 60  # default 60
+        asset:
+            enable: false
+            timeout: 60  # default 10800
+
 logging:
     log_dir: log
     log_level: DEBUG  # DEBUG, INFO, WARNING, ERROR, CRITICAL
