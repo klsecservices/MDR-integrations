@@ -110,7 +110,9 @@ class EventSender():
         dst_host = config['event_sender'].get('destination_host')
         dst_port = int(config['event_sender'].get('destination_port'))
         self.server_address = (dst_host, dst_port)
-        self.protocol = config['event_sender'].get('protocol', 'tcp')
+        self.protocol = config['event_sender'].get('protocol', 'tcp').lower()
+        if self.protocol not in ('tcp', 'udp'):
+            raise ValueError('"protocol" option should be in ["tcp", "udp"]')
         self.format = config['event_sender'].get('format', 'raw').lower()
         self.syslog_header = config['event_sender'].get('syslog_header', False)
         self.hostname = socket.getfqdn() or 'unknown'
@@ -150,12 +152,10 @@ class EventSender():
         return files
 
     def send_to(self, sock, events):
-        if self.protocol.lower() == 'tcp':
+        if self.protocol == 'tcp':
             self.send_TCP(sock, events)
-        elif self.protocol.lower() == 'udp':
-            self.send_UDP(sock, events)
         else:
-            raise ValueError('"protocol" option should be in ["tcp", "udp"]')
+            self.send_UDP(sock, events)
 
 
     def send_TCP(self, sock, events):
@@ -193,7 +193,8 @@ class EventSender():
             matched_files.append(update_file)
 
         if events:
-            with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+            sock_type = socket.SOCK_STREAM if self.protocol == 'tcp' else socket.SOCK_DGRAM
+            with closing(socket.socket(socket.AF_INET, sock_type)) as sock:
                 self.send_to(sock, events)
 
         for update_file in matched_files:
