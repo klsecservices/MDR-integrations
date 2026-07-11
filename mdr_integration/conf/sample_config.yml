@@ -70,7 +70,7 @@ event_sender:
             timeout: 60  # default 60
         asset:
             enable: false
-            timeout: 60  # default 10800
+            timeout: 10800  # default 10800
 
 logging:
     log_dir: log

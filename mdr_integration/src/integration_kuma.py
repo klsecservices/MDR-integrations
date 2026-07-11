@@ -267,7 +267,7 @@ class KUMA():
                 self.logger.info('starting to import assets..')
                 self.import_assets()
                 self.logger.info('MDR assets are processed')
-                asset_timeout_cur = self.enable_asset
+                asset_timeout_cur = self.asset_timeout
             
             incident_timeout_cur = incident_timeout_cur - self.timeout
             asset_timeout_cur = asset_timeout_cur - self.timeout

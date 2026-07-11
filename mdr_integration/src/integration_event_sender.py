@@ -117,6 +117,7 @@ class EventSender():
         self.syslog_header = config['event_sender'].get('syslog_header', False)
         self.hostname = socket.getfqdn() or 'unknown'
         self.incident_timeout = config['event_sender']['modules']['incident'].get('timeout', 60)
+        self.asset_timeout = config['event_sender']['modules']['asset'].get('timeout', 10800)
         self.timeout = 10  # default value for infinite loop
         self.data_dir = config.get('data_dir', 'data')
         self.token_dir = config.get('token_dir', 'conf')
@@ -332,7 +333,7 @@ class EventSender():
                 self.logger.info('starting to import assets..')
                 self.process_assets()
                 self.logger.info('MDR assets are processed')
-                asset_timeout_cur = self.enable_asset
+                asset_timeout_cur = self.asset_timeout
             
             incident_timeout_cur = incident_timeout_cur - self.timeout
             asset_timeout_cur = asset_timeout_cur - self.timeout
