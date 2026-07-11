@@ -244,7 +244,9 @@ class EventSender():
         return header
 
     def event_cef_quoting(self, data):
+        data = data.replace('\r\n', '\n').replace('\r', '\n')
         data = data.replace('\\', '\\\\').replace('=', '\\=')
+        data = data.replace('\n', '\\n')
         return data
 
     def event_leef_quoting(self, data):
