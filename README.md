@@ -22,17 +22,20 @@ If you have a problem, request, or question then please open a new issue [here](
 2. New incidents and updates (such as comments, responses, attachmetns) from the Kaspersky MDR are saved in the directory
 3. These incidents and updates can then be processed and uploaded to the third-party system for further action
 
+Supported destinations: KUMA, TheHive, and any generic TCP/UDP receiver (e.g. a SIEM/syslog server) via the Event Sender module, in LEEF, CEF or raw JSON format.
+
 ## Requirements
 
 These requirements are for the environment:
 
 * Any Linux, MacOS or Windows
 * Python 3.8+
-* Python packages
-  * default: os, pathlib, re, json, logging, time, multiprocessing, re
-  * yaml
+* Python packages (see `requirements.txt`)
+  * default: os, pathlib, re, json, logging, time, multiprocessing
+  * PyYAML
   * requests
   * PyJWT
+  * thehive4py - only required if the `thehive` integration module is enabled
 
 ## Installation
 
@@ -42,6 +45,12 @@ First step:
 
 ```
 git clone https://github.com/klsecservices/integration.git
+```
+
+Install the Python dependencies (skip `thehive4py` if you don't plan to enable the `thehive` module):
+
+```
+pip install -r requirements.txt
 ```
 
 Second step, configure you connection with MDR Console
@@ -57,7 +66,8 @@ Create your refresh token using [this guide (kaspersky.com)](https://support.kas
 Configure ```conf/config.yml``` file. The most important settings:
 
 * ```client_id``` - copy it from the MDR Console
-* ```mdr_sync.filter.incidents.min_creation_time``` - specify the starting time for the download updates. Use Unix timestamp fotmat with miliseconds (13 digits)
+* ```mdr_sync.modules.incident.filter.min_creation_time``` - specify the starting time for the download updates. Use Unix timestamp format with miliseconds (13 digits)
+* Enable and configure at least one destination module (```kuma```, ```thehive``` or ```event_sender```) by setting its ```modules.incident.enable``` (and, where applicable, ```modules.asset.enable```) to ```true``` - otherwise incidents are only downloaded to the local data directory and never delivered anywhere
 
 Third step, run script
 

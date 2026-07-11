@@ -1,0 +1,7 @@
+PyYAML
+requests
+PyJWT
+urllib3
+
+# Only required if the "thehive" integration module is enabled
+thehive4py
