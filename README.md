@@ -128,6 +128,21 @@ sudo systemctl start mdr_integration.service
 sudo systemctl status mdr_integration.service
 ```
 
+#### Automatic recovery from a crash loop
+
+`main.py` supervises its own subprocesses and restarts any of them that dies. However, if the same subprocess keeps crashing repeatedly in a short period (see `CRASH_LOOP_THRESHOLD` / `CRASH_LOOP_WINDOW` in `main.py`), the whole service exits with a non-zero code instead of retrying forever, since the integration as a whole isn't useful with a module stuck down.
+
+By default the example unit above has no `Restart=` directive, so systemd will **not** bring the service back up automatically after such an exit - it is left in a `failed` state for an operator to investigate. If you'd rather have systemd retry automatically, add to the `[Service]` section, e.g.:
+
+```
+Restart=on-failure
+RestartSec=30
+StartLimitIntervalSec=600
+StartLimitBurst=3
+```
+
+This is optional and left to each deployment to decide, since automatic restarts can mask a persistently broken configuration instead of surfacing it.
+
 ## References
 * [Request a Free Kaspersky MDR POC](https://www.kaspersky.com/enterprise-security/managed-detection-and-response)
 * [Kaspersky MDR Datasheet](https://content.kaspersky-labs.com/se/media/en/business-security/kaspersky-mdr-datasheet.pdf)
