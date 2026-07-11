@@ -22,7 +22,7 @@ config['logging']['log_dir'] = f"{WORK_DIR}/{config['logging'].get('log_dir', 'l
 temp_files = ['.access_token', '.refresh_token', '.last_check']
 for temp_file in temp_files:
     if not pathlib.Path(f"{config['token_dir']}/{temp_file}").is_file():
-        open(f"{config['data_dir']}/{temp_file}", 'w').close()
+        open(f"{config['token_dir']}/{temp_file}", 'w').close()
 
 
 def process_logging_configurer(queue):
