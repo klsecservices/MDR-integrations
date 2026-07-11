@@ -17,6 +17,8 @@ from src.logger import MDRLogger
 class TheHive():
 
     # Const
+    CONSUMER_NAME = 'thehive'
+
     priority_mapping = {
         'LOW': 1,
         'NORMAL': 2,
@@ -38,13 +40,30 @@ class TheHive():
         self.incident_timeout = config['thehive']['modules']['incident'].get('timeout', 60)
         self.timeout = 10  # default value for infinite loop
         self.data_dir = config.get('data_dir', 'data')
+        self.token_dir = config.get('token_dir', 'conf')
+        self.state_file = f'{self.token_dir}/.processed_{self.CONSUMER_NAME}'
+        self.processed_files = self.load_processed_state()
         self.api = TheHiveApi(api_url, api_key)
         #self.logger.info('initialized')
         self.enable_incident = config['thehive']['modules']['incident'].get('enable', False)
 
 
+    def load_processed_state(self):
+        try:
+            with open(self.state_file, 'r') as f:
+                return set(json.load(f))
+        except FileNotFoundError:
+            return set()
+
+
+    def save_processed_state(self):
+        with open(self.state_file, 'w') as f:
+            json.dump(sorted(self.processed_files), f)
+
+
     def scan_folder(self):
         files = glob.glob(f'{self.data_dir}/*.json')
+        files = [f for f in files if os.path.basename(f) not in self.processed_files]
         self.logger.info(f'Found {len(files)} file(s) to process')
         return files
 
@@ -327,7 +346,8 @@ class TheHive():
 
 
     def set_update_as_processed(self, filename: str) -> None:
-        os.rename(filename, f'{filename}.processed')
+        self.processed_files.add(os.path.basename(filename))
+        self.save_processed_state()
 
 
     def run(self, logging_queue, logging_configurer) -> None:

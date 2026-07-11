@@ -11,7 +11,8 @@ import socket
 from contextlib import closing
 
 class EventSender():
-
+    
+    # Const
     MAPPING_INCIDENT = {
         "incident_id":	        {"leef": "inc_id",	        "cef":"inc_id"},	  # "-MAfspsBq_r24TsN5-jl",
         "summary":	            {"leef": "summary",	        "cef":"summary"},	  # "Test",
@@ -103,6 +104,8 @@ class EventSender():
         "entity_type":  {"leef": "entity_type", "cef":"cat"},	   # create
     }
 
+    CONSUMER_NAME = 'event_sender'
+
     def __init__(self, config):
         dst_host = config['event_sender'].get('destination_host')
         dst_port = int(config['event_sender'].get('destination_port'))
@@ -113,9 +116,25 @@ class EventSender():
         self.hostname = socket.getfqdn() or 'unknown'
         self.incident_timeout = config['event_sender']['modules']['incident'].get('timeout', 60)
         self.timeout = 10  # default value for infinite loop
-        self.data_dir = config.get('data_dir', 'data')  
+        self.data_dir = config.get('data_dir', 'data')
+        self.token_dir = config.get('token_dir', 'conf')
+        self.state_file = f'{self.token_dir}/.processed_{self.CONSUMER_NAME}'
+        self.processed_files = self.load_processed_state()
         self.enable_incident = config['event_sender']['modules']['incident'].get('enable', False)
         self.enable_asset = config['event_sender']['modules']['asset'].get('enable', False)
+
+
+    def load_processed_state(self):
+        try:
+            with open(self.state_file, 'r') as f:
+                return set(json.load(f))
+        except FileNotFoundError:
+            return set()
+
+
+    def save_processed_state(self):
+        with open(self.state_file, 'w') as f:
+            json.dump(sorted(self.processed_files), f)
 
 
     def read_file(self, filename):
@@ -126,6 +145,7 @@ class EventSender():
 
     def scan_folder(self):
         files = glob.glob(f'{self.data_dir}/*.json')
+        files = [f for f in files if os.path.basename(f) not in self.processed_files]
         self.logger.info(f'Found {len(files)} file(s) to process')
         return files
 
@@ -148,21 +168,21 @@ class EventSender():
             sock.sendto(event.encode() + b'\n', self.server_address)
     
     def process_updates(self):
-        
+
         files = self.scan_folder()
-        
+
         events = []
+        matched_files = []
 
         for update_file in files:
-            event_data = self.read_file(update_file)
-            event_type = ''
             if 'new_incident' in update_file:
                 event_type = 'new_incident'
             elif 'incident_updates' in update_file:
                 event_type = 'incident_updates'
             else:
                 continue
-            
+
+            event_data = self.read_file(update_file)
             if isinstance(event_data, list):
                 for e in event_data:
                     event = self.build_event(e, event_type)
@@ -170,11 +190,13 @@ class EventSender():
             elif isinstance(event_data, dict):
                 event = self.build_event(event_data, event_type)
                 events.append(event)
-        
-        with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
-            self.send_to(sock, events)
-                  
-        for update_file in files:
+            matched_files.append(update_file)
+
+        if events:
+            with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
+                self.send_to(sock, events)
+
+        for update_file in matched_files:
             self.set_update_as_processed(update_file)
 
 
@@ -283,7 +305,8 @@ class EventSender():
 
 
     def set_update_as_processed(self, filename):
-        os.rename(filename, f'{filename}.processed')
+        self.processed_files.add(os.path.basename(filename))
+        self.save_processed_state()
 
 
     def run(self, logging_queue, logging_configurer):
