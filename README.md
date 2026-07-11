@@ -6,7 +6,7 @@
 
 # Kaspersky MDR Integration
 
-Kaspersky MDR integration is a tool designed to provide the capability to integrate third-party systems with the Kaspersky Managed Detection and Response (MDR) Console. It helps to automatically route MDR incidents to the appropriate IRP/SOAR or ticket system for more convinient way of communication with Security Operation Team.
+Kaspersky MDR integration is a tool designed to provide the capability to integrate third-party systems with the Kaspersky Managed Detection and Response (MDR) Console. It helps to automatically route MDR incidents to the appropriate IRP/SOAR or ticket system for a more convenient way of communication with the Security Operations Team.
 
 If you have a problem, request, or question then please open a new issue [here](/issues).
 
@@ -19,7 +19,7 @@ If you have a problem, request, or question then please open a new issue [here](
 ## How it works
 
 1. The tool connects to the Kaspersky MDR Console
-2. New incidents and updates (such as comments, responses, attachmetns) from the Kaspersky MDR are saved in the directory
+2. New incidents and updates (such as comments, responses, attachments) from the Kaspersky MDR are saved in the directory
 3. These incidents and updates can then be processed and uploaded to the third-party system for further action
 
 Supported destinations: KUMA, TheHive, and any generic TCP/UDP receiver (e.g. a SIEM/syslog server) via the Event Sender module, in LEEF, CEF or raw JSON format.
@@ -39,7 +39,7 @@ These requirements are for the environment:
 
 ## Installation
 
-Before start to install please read the **[Online documentation](https://support.kaspersky.com/MDR/en-US/204467.htm)**
+Before you start the installation, please read the **[Online documentation](https://support.kaspersky.com/MDR/en-US/204467.htm)**
 
 First step:
 
@@ -53,7 +53,7 @@ Install the Python dependencies (skip `thehive4py` if you don't plan to enable t
 pip install -r requirements.txt
 ```
 
-Second step, configure you connection with MDR Console
+Second step, configure your connection with MDR Console
 
 ```
 cd integration/mdr_integration/conf
@@ -61,12 +61,12 @@ touch .refresh_token
 cp sample_config.yml config.yml
 ```
 
-Create your refresh token using [this guide (kaspersky.com)](https://support.kaspersky.com/MDR/en-US/258278.htm). Paste generated token to the .refresh_token file.
+Create your refresh token using [this guide (kaspersky.com)](https://support.kaspersky.com/MDR/en-US/258278.htm). Paste the generated token into the .refresh_token file.
 
 Configure ```conf/config.yml``` file. The most important settings:
 
 * ```client_id``` - copy it from the MDR Console
-* ```mdr_sync.modules.incident.filter.min_creation_time``` - specify the starting time for the download updates. Use Unix timestamp format with miliseconds (13 digits)
+* ```mdr_sync.modules.incident.filter.min_creation_time``` - specify the starting time for the download updates. Use Unix timestamp format with milliseconds (13 digits)
 * Enable and configure at least one destination module (```kuma```, ```thehive``` or ```event_sender```) by setting its ```modules.incident.enable``` (and, where applicable, ```modules.asset.enable```) to ```true``` - otherwise incidents are only downloaded to the local data directory and never delivered anywhere
 
 Third step, run script
