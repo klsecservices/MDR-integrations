@@ -36,7 +36,7 @@ class MDRSync():
 
     def update_access_token(self) -> str:
         with open(f'{self.token_dir}/.access_token', 'r') as f:
-            access_token = f.read()
+            access_token = f.read().strip()
         return access_token
 
 
