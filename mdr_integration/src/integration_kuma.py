@@ -10,6 +10,8 @@ from src.kuma_api import KUMA_API
 class KUMA():
 
     # Const
+    CONSUMER_NAME = 'kuma'
+
     priority_mapping = {
         'LOW': 1,
         'NORMAL': 2,
@@ -27,13 +29,30 @@ class KUMA():
         self.asset_timeout = config['kuma']['modules']['asset'].get('timeout', 10800)
         self.timeout = 10  # default value for infinite loop
         self.data_dir = config.get('data_dir', 'data')
+        self.token_dir = config.get('token_dir', 'conf')
+        self.state_file = f'{self.token_dir}/.processed_{self.CONSUMER_NAME}'
+        self.processed_files = self.load_processed_state()
         self.api = KUMA_API(api_url, api_token, ssl_cert, api_version)
         self.enable_incident = config['kuma']['modules']['incident'].get('enable', False)
         self.enable_asset = config['kuma']['modules']['asset'].get('enable', False)
 
 
+    def load_processed_state(self):
+        try:
+            with open(self.state_file, 'r') as f:
+                return set(json.load(f))
+        except FileNotFoundError:
+            return set()
+
+
+    def save_processed_state(self):
+        with open(self.state_file, 'w') as f:
+            json.dump(sorted(self.processed_files), f)
+
+
     def scan_folder(self):
         files = glob.glob(f'{self.data_dir}/*.json')
+        files = [f for f in files if os.path.basename(f) not in self.processed_files]
         self.logger.info(f'Found {len(files)} file(s) to process')
         return files
 
@@ -133,7 +152,7 @@ class KUMA():
     def update_incident_comment(self, data, incident_number):
 
         params = {
-            "name": f"^{incident_number}\s\-\s"
+            "name": fr"^{incident_number}\s\-\s"
         }
         response = self.get_kuma_incidents(params)
         if not response:
@@ -164,7 +183,7 @@ class KUMA():
     def update_incident_attachment(self, data, incident_number):
         
         params = {
-            "name": f"^{incident_number}\s\-\s"
+            "name": fr"^{incident_number}\s\-\s"
         }
         response = self.get_kuma_incidents(params)
         if not response:
@@ -195,7 +214,7 @@ class KUMA():
     def update_incident_response(self, data, incident_number):
         
         params = {
-            "name": f"^{incident_number}\s\-\s"
+            "name": fr"^{incident_number}\s\-\s"
         }
         response = self.get_kuma_incidents(params)
         if not response:
@@ -224,7 +243,8 @@ class KUMA():
 
 
     def set_update_as_processed(self, filename):
-        os.rename(filename, f'{filename}.processed')
+        self.processed_files.add(os.path.basename(filename))
+        self.save_processed_state()
 
 
     def run(self, logging_queue, logging_configurer):
@@ -247,7 +267,7 @@ class KUMA():
                 self.logger.info('starting to import assets..')
                 self.import_assets()
                 self.logger.info('MDR assets are processed')
-                asset_timeout_cur = self.enable_asset
+                asset_timeout_cur = self.asset_timeout
             
             incident_timeout_cur = incident_timeout_cur - self.timeout
             asset_timeout_cur = asset_timeout_cur - self.timeout

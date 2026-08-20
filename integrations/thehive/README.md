@@ -10,7 +10,7 @@
 
 TheHive 4.0 and above.
 
-TheHive 3.x not tested
+TheHive 3.x is not tested
 
 #### Packages
 
@@ -33,7 +33,7 @@ CaseCustomField:
 - Description: MDR Incident ID
 - Type: string
 
-Для добавления поля необходимо перейти в Switch organisation (on the top tab) → admin → Admin (on the top tab) → Add custom field
+Для добавления поля необходимо перейти в Switch organization (on the top tab) → admin → Admin (on the top tab) → Add custom field
 
 ### Installation
 
@@ -82,6 +82,6 @@ CaseCustomField:
 
 ## Reference
 
-**[TheHive API	TheHive4py Documentation](thehive-project.github.io)**
+**[TheHive4py Documentation](https://thehive-project.github.io)**
 
 

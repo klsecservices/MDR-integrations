@@ -9,8 +9,8 @@ from src.mdr_api import MDRConsole
 
 class MDRSync():
 
-    IPV4_RE = '\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
-    IPV6_RE = '(?:[a-fA-F0-9]{1,4}:){7}(?:[a-fA-F0-9]{1,4})'
+    IPV4_RE = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+    IPV6_RE = r'(?:[a-fA-F0-9]{1,4}:){7}(?:[a-fA-F0-9]{1,4})'
 
     def __init__(self, config: Dict[str, Any]) -> None:
         api_url = config.get('api_url')
@@ -36,7 +36,7 @@ class MDRSync():
 
     def update_access_token(self) -> str:
         with open(f'{self.token_dir}/.access_token', 'r') as f:
-            access_token = f.read()
+            access_token = f.read().strip()
         return access_token
 
 

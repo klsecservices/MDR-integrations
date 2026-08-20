@@ -59,12 +59,12 @@ class TokenUpdater():
 
     def read_refresh_token(self):
         with open(f'{self.token_dir}/.refresh_token', 'r') as f:
-            refresh_token = f.read()
+            refresh_token = f.read().strip()
         return refresh_token
-    
+
     def read_access_token(self):
         with open(f'{self.token_dir}/.access_token', 'r') as f:
-            access_token = f.read()
+            access_token = f.read().strip()
         return access_token
     
     def write_refresh_token(self, refresh_token):
